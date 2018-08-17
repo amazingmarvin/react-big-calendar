@@ -57,7 +57,8 @@
   },
   "peerDependencies": {
     "react": "^15.3.0 || ^16.0.0",
-    "react-dom": "^15.3.0 || ^16.0.0"
+    "react-dom": "^15.3.0 || ^16.0.0",
+    "react-dnd": "^2.1.4"
   },
   "devDependencies": {
     "@storybook/addon-actions": "^3.4.8",
