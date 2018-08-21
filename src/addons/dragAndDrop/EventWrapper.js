@@ -132,8 +132,8 @@ class EventWrapper extends React.Component {
         // replace original event child with anchor-embellished child
         children: (
           <div className="rbc-addons-dnd-resizable">
-            {StartAnchor}
             {children.props.children}
+            {StartAnchor}
             {EndAnchor}
           </div>
         ),
