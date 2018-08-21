@@ -2,6 +2,7 @@ import PropTypes from 'prop-types'
 import React from 'react'
 import dates from '../../utils/dates'
 import { findDOMNode } from 'react-dom'
+import { DropTarget } from 'react-dnd'
 
 import Selection, {
   getBoundsForNode,
@@ -25,6 +26,7 @@ class EventContainerWrapper extends React.Component {
     localizer: PropTypes.object.isRequired,
     slotMetrics: PropTypes.object.isRequired,
     resource: PropTypes.any,
+    connectDropTarget: PropTypes.func,
   }
 
   static contextTypes = {
@@ -71,8 +73,16 @@ class EventContainerWrapper extends React.Component {
     })
   }
 
-  handleMove = (point, boundaryBox) => {
-    const { event } = this.context.draggable.dragAndDropAction
+  handleMove = (point, boundaryBox, event = null) => {
+    let isExternal
+    if (event) {
+      // Drag came from react-dnd
+      isExternal = true
+    } else {
+      isExternal = false
+      event = this.context.draggable.dragAndDropAction.event
+    }
+
     const { accessors, slotMetrics } = this.props
 
     if (!pointInColumn(boundaryBox, point)) {
@@ -80,10 +90,15 @@ class EventContainerWrapper extends React.Component {
       return
     }
 
-    let currentSlot = slotMetrics.closestSlotFromPoint(
-      { y: point.y - this.eventOffsetTop, x: point.x },
-      boundaryBox
-    )
+    let currentSlot
+    if (isExternal) {
+      currentSlot = slotMetrics.closestSlotFromPoint(point, boundaryBox)
+    } else {
+      currentSlot = slotMetrics.closestSlotFromPoint(
+        { y: point.y - this.eventOffsetTop, x: point.x },
+        boundaryBox
+      )
+    }
 
     let eventStart = accessors.start(event)
     let eventEnd = accessors.end(event)
@@ -180,11 +195,12 @@ class EventContainerWrapper extends React.Component {
       getters,
       slotMetrics,
       localizer,
+      connectDropTarget,
     } = this.props
 
     let { event, top, height } = this.state
 
-    if (!event) return children
+    if (!event) return connectDropTarget(children)
 
     const events = children.props.children
     const { start, end } = event
@@ -201,29 +217,79 @@ class EventContainerWrapper extends React.Component {
     if (startsBeforeDay && startsAfterDay) label = localizer.messages.allDay
     else label = localizer.format({ start, end }, format)
 
-    return React.cloneElement(children, {
-      children: (
-        <React.Fragment>
-          {events}
+    return connectDropTarget(
+      React.cloneElement(children, {
+        children: (
+          <React.Fragment>
+            {events}
 
-          {event && (
-            <TimeGridEvent
-              event={event}
-              label={label}
-              className="rbc-addons-dnd-drag-preview"
-              style={{ top, height, width: 100 }}
-              getters={getters}
-              components={{ ...components, eventWrapper: NoopWrapper }}
-              accessors={{ ...accessors, ...dragAccessors }}
-              continuesEarlier={startsBeforeDay}
-              continuesLater={startsAfterDay}
-            />
-          )}
-        </React.Fragment>
-      ),
-    })
+            {event && (
+              <TimeGridEvent
+                event={event}
+                label={label}
+                className="rbc-addons-dnd-drag-preview"
+                style={{ top, height, width: 100 }}
+                getters={getters}
+                components={{ ...components, eventWrapper: NoopWrapper }}
+                accessors={{ ...accessors, ...dragAccessors }}
+                continuesEarlier={startsBeforeDay}
+                continuesLater={startsAfterDay}
+              />
+            )}
+          </React.Fragment>
+        ),
+      })
+    )
   }
 }
+
+function getDropSourceType(props) {
+  return props.dropSourceType || 'event'
+}
+
+let lastHover // for throttling hover
+const dropSpec = {
+  // eslint-disable-next-line
+  canDrop(props, monitor, component) {
+    return true
+  },
+
+  hover(props, monitor, component) {
+    // Throttle hover
+    const now = Date.now()
+    if (lastHover && now - lastHover < 30) {
+      return
+    }
+    lastHover = now
+
+    const item = monitor.getItem()
+    const point = monitor.getClientOffset()
+
+    const node = findDOMNode(component)
+    const bounds = getBoundsForNode(node)
+    component.handleMove(point, bounds, item)
+  },
+
+  drop(props, monitor, component) {
+    const { start } = component.state.event
+    component.reset()
+    return {
+      time: start,
+    }
+  },
+}
+
+function collect(connect, monitor) {
+  return {
+    connectDropTarget: connect.dropTarget(),
+    isItemOver: monitor.isOver(),
+  }
+}
+
+// eslint-disable-next-line
+EventContainerWrapper = DropTarget(getDropSourceType, dropSpec, collect)(
+  EventContainerWrapper
+)
 
 EventContainerWrapper.propTypes = propTypes
 
