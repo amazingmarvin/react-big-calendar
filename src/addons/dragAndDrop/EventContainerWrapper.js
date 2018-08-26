@@ -263,6 +263,10 @@ const dropSpec = {
     lastHover = now
 
     const item = monitor.getItem()
+    if (!item._rbc) {
+      return
+    }
+
     const point = monitor.getClientOffset()
 
     const node = findDOMNode(component)
