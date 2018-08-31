@@ -27,6 +27,7 @@ class EventContainerWrapper extends React.Component {
     slotMetrics: PropTypes.object.isRequired,
     resource: PropTypes.any,
     connectDropTarget: PropTypes.func,
+    isItemOver: PropTypes.bool,
   }
 
   static contextTypes = {
@@ -49,6 +50,12 @@ class EventContainerWrapper extends React.Component {
 
   componentWillUnmount() {
     this._teardownSelectable()
+  }
+
+  componentWillReceiveProps(nextProps) {
+    if (this.props.isItemOver && !nextProps.isItemOver) {
+      this.reset()
+    }
   }
 
   reset() {
