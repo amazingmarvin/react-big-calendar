@@ -1,3 +1,4 @@
+/* eslint-disable */
 import PropTypes from 'prop-types'
 import React from 'react'
 import dates from '../../utils/dates'
@@ -28,6 +29,8 @@ class EventContainerWrapper extends React.Component {
     resource: PropTypes.any,
     connectDropTarget: PropTypes.func,
     isItemOver: PropTypes.bool,
+    onScrollDown: PropTypes.func,
+    onScrollUp: PropTypes.func,
   }
 
   static contextTypes = {
@@ -42,6 +45,9 @@ class EventContainerWrapper extends React.Component {
   constructor(...args) {
     super(...args)
     this.state = {}
+
+    // Used to scroll when at the top or bottom of the screen
+    this.scrollInterval = null
   }
 
   componentDidMount() {
@@ -50,6 +56,7 @@ class EventContainerWrapper extends React.Component {
 
   componentWillUnmount() {
     this._teardownSelectable()
+    clearInterval(this.scrollInterval)
   }
 
   componentWillReceiveProps(nextProps) {
@@ -61,6 +68,49 @@ class EventContainerWrapper extends React.Component {
   reset() {
     if (this.state.event)
       this.setState({ event: null, top: null, height: null })
+    clearInterval(this.scrollInterval)
+  }
+
+  scrollDown() {
+    if (this.scrollingDown) {
+      return
+    }
+
+    if (this.scrollingUp) {
+      clearInterval(this.scrollInterval)
+      this.scrollingUp = false
+    }
+
+    this.scrollingDown = true
+
+    const container = document.querySelector('.AMContent')
+    this.scrollInterval = setInterval(function() {
+      container.scrollTop += 13
+    }, 40)
+  }
+
+  scrollUp() {
+    if (this.scrollingUp) {
+      return
+    }
+
+    if (this.scrollingDown) {
+      clearInterval(this.scrollInterval)
+      this.scrollingDown = false
+    }
+
+    this.scrollingUp = true
+
+    const container = document.querySelector('.AMContent')
+    this.scrollInterval = setInterval(function() {
+      container.scrollTop -= 13
+    }, 40)
+  }
+
+  stopScrolling() {
+    clearInterval(this.scrollInterval)
+    this.scrollingUp = false
+    this.scrollingDown = false
   }
 
   update(event, { startDate, endDate, top, height }) {
@@ -116,6 +166,14 @@ class EventContainerWrapper extends React.Component {
     )
 
     this.update(event, slotMetrics.getRange(currentSlot, end))
+
+    if (point.y < 100) {
+      this.scrollUp()
+    } else if (point.y > window.innerHeight - 150) {
+      this.scrollDown()
+    } else {
+      this.stopScrolling()
+    }
   }
 
   handleResize(point, boundaryBox) {
