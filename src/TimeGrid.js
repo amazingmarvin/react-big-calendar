@@ -285,7 +285,8 @@ export default class TimeGrid extends Component {
   measureGutter() {
     const width = getWidth(this.gutter)
 
-    if (width && this.state.gutterWidth !== width) {
+    if (width && width !== this.lastWidth) {
+      this.lastWidth = width
       this.setState({ gutterWidth: width })
     }
   }
