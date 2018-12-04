@@ -1,13 +1,15 @@
 import PropTypes from 'prop-types'
 import React from 'react'
+import dates from './utils/dates'
 
 import Week from './Week'
 import TimeGrid from './TimeGrid'
 
-function workWeekRange(date, options) {
-  return Week.range(date, options).filter(
-    d => [6, 0].indexOf(d.getDay()) === -1
-  )
+function workWeekRange(date, { workWeekStart }) {
+  let start = dates.startOf(date, 'week', workWeekStart)
+  let end = dates.endOf(date, 'week', workWeekStart)
+
+  return dates.range(start, end).slice(0, 5)
 }
 
 class WorkWeek extends React.Component {
@@ -29,8 +31,8 @@ WorkWeek.range = workWeekRange
 
 WorkWeek.navigate = Week.navigate
 
-WorkWeek.title = (date, { localizer }) => {
-  let [start, ...rest] = workWeekRange(date, { localizer })
+WorkWeek.title = (date, { localizer, workWeekStart }) => {
+  let [start, ...rest] = workWeekRange(date, { workWeekStart })
 
   return localizer.format({ start, end: rest.pop() }, 'dayRangeHeaderFormat')
 }
