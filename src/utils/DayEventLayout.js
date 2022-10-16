@@ -24,6 +24,7 @@ class Event {
 function areEventsTooCloseOrOverlapping(a, b, minimumStartDifference) {
   return (
     // Occupies the same start slot.
+    (minimumStartDifference === 0 && b.start === a.start) ||
     Math.abs(b.start - a.start) < minimumStartDifference ||
     // A's start slot overlaps with b's end slot.
     (b.start > a.start && b.start < a.end)
@@ -109,8 +110,8 @@ function getStyledEvents({
                   width:
                     columnIdx === group.length - 1
                       ? 100 / group.length
-                      : (100 / group.length) * 1.7,
-                  xOffset: (100 / group.length) * columnIdx,
+                      : 100 / group.length * 1.7,
+                  xOffset: 100 / group.length * columnIdx,
                 },
               }))
             ),
