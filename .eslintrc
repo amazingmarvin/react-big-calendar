@@ -1,13 +1,11 @@
-parser: babel-eslint
+parser: "@babel/eslint-parser"
 extends:
   - jason/react
   - prettier
 
 rules:
   global-require: off
-  no-unused-vars: [2, {
-    vars: all,
-    args: after-used,
-    varsIgnorePattern: ^_,
-    argsIgnorePattern: ^_,
-  }]
+  no-unused-vars: off
+
+parserOptions:
+  requireConfigFile: false
