@@ -130,20 +130,14 @@ class EventContainerWrapper extends React.Component {
     setTimeout(() => {
       const draggedEl = qsa(node, '.rbc-addons-dnd-drag-preview')[0]
       if (draggedEl) {
-        if (draggedEl.offsetTop < parent.scrollTop) {
-          scrollTop(parent, Math.max(draggedEl.offsetTop, 0))
-        } else if (
-          draggedEl.offsetTop + draggedEl.offsetHeight >
-          parent.scrollTop + parent.clientHeight
-        ) {
+        const box = draggedEl.getBoundingClientRect()
+
+        if (box.top < 80) {
+          scrollTop(parent, Math.max(parent.scrollTop - 80, 0))
+        } else if (box.bottom > window.innerHeight) {
           scrollTop(
             parent,
-            Math.min(
-              draggedEl.offsetTop -
-                parent.offsetHeight +
-                draggedEl.offsetHeight,
-              parent.scrollHeight
-            )
+            Math.min(parent.scrollTop + 80, parent.scrollHeight)
           )
         }
       }
