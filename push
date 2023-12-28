@@ -6,4 +6,6 @@ git checkout -b production
 
 yarn build
 git add -f lib
+git commit -m "feat: update build files"
 git push -u origin production
+git checkout master
