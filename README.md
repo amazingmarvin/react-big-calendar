@@ -1,3 +1,5 @@
+At some point upstream stopped using react-dnd and our code diverged. Unfortunately upgrading to react 17 broke stuff and it was no longer viable to keep our own codebase built on the old version. So this branch is no longer used.
+
 # react-big-calendar
 
 An events calendar component built for React and made for modern browsers (read: IE10+) and uses flexbox over the classic tables-ception approach.
