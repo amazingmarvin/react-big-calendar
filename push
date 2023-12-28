@@ -1,0 +1,9 @@
+#!/bin/bash
+
+git branch -D production
+git push origin --delete production
+git checkout -b production
+
+yarn build
+git add -f lib
+git push -u origin production
