@@ -5,6 +5,13 @@ import Week from './Week'
 import TimeGrid from './TimeGrid'
 
 function workWeekRange(date, options) {
+  if (options.workWeekStart === 0) {
+    return Week.range(date, options).filter((d) => {
+      const weekDay = d.getDay()
+      return weekDay !== 5 && weekDay !== 6
+    })
+  }
+
   return Week.range(date, options).filter(
     (d) => [6, 0].indexOf(d.getDay()) === -1
   )
