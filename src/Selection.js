@@ -330,6 +330,9 @@ class Selection {
   }
 
   _handleTerminatingEvent(e) {
+    // For keydown events, only terminate on Escape
+    if (e.type === 'keydown' && e.key !== 'Escape') return
+
     const { pageX, pageY } = getEventCoordinates(e)
 
     this.selecting = false
