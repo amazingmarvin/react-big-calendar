@@ -17,6 +17,7 @@ export default function withDragAndDrop(Calendar) {
       onEventDrop: PropTypes.func,
       onEventResize: PropTypes.func,
       onDragStart: PropTypes.func,
+      onDragEnd: PropTypes.func,
       onDragOver: PropTypes.func,
       onDropFromOutside: PropTypes.func,
 
@@ -89,6 +90,9 @@ export default function withDragAndDrop(Calendar) {
         interacting: false,
         direction: null,
       })
+
+      const { onDragEnd } = this.props
+      if (onDragEnd) onDragEnd({ event, action, direction: null })
 
       if (interactionInfo == null) return
 
